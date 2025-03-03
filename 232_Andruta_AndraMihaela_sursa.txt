@@ -1,0 +1,1290 @@
+COD SQL ȘI PL/SQL
+=======================================EX4=======================================
+--secvente 
+create sequence seq_utilizator
+increment by 1
+start with 100
+maxvalue 999
+nocycle;
+
+create sequence seq_gazda
+increment by 1
+start with 10
+maxvalue 99
+nocycle;
+
+create sequence seq_rezervare
+increment by 1
+start with 1000
+maxvalue 9999
+nocycle;
+create sequence seq_locuinta
+increment by 10
+start with 200
+maxvalue 9999
+nocycle;
+
+create sequence seq_tarife
+increment by 1
+start with 600
+maxvalue 999
+nocycle;
+
+create table regiuni(
+id_regiune number constraint pk_regiune primary key, 
+nume_regiune varchar2(30) 
+);
+
+create table tari(
+id_tara char(2) constraint pk_tara primary key, 
+nume_tara varchar2(30),
+id_regiune number,
+constraint fk_tari foreign key (id_regiune) references regiuni(id_regiune)
+);
+ 
+
+create table locatie(
+id_locatie number constraint pk_locatie primary key, 
+adresa varchar2(100),
+cod_postal varchar2(10),
+localitate varchar2(30),
+id_tara char(2),
+constraint fk_locatii foreign key (id_tara) references tari(id_tara));
+ 
+
+create table tipuri_locuinte(
+id_tip number constraint pk_tip primary key,
+nume_tip varchar2(20),
+id_tarif number,
+constraint fk_tarif_tip foreign key (id_tarif) references tarife(id_tarif)
+);
+desc tipuri_locuinte;
+ 
+
+
+create table dotari(
+id_dotare number constraint pk_dotare primary key,
+nume varchar2(20),
+cost_suplimentar number
+);
+ 
+create table gazda(
+id_gazda number constraint pk_gazda primary key, 
+nume varchar2(30),
+prenume varchar2(30),
+email varchar2(40),
+telefon varchar(20),
+data_inceput_activitate date
+);
+ 
+
+create table locuinta(
+id_locuinta number constraint pk_locuinta primary key, 
+id_tip number,
+nume_locuinta varchar2(30),
+id_locatie number,
+capacitate number,
+id_gazda number,
+constraint fk_locuinta foreign key (id_tip) references tipuri_locuinte(id_tip),
+constraint fk_locuinta2 foreign key (id_locatie) references locatie(id_locatie),
+constraint fk_locuinta3 foreign key (id_gazda) references gazda(id_gazda)
+);
+ 
+create table tarife(
+id_tarif number constraint pk_tarif primary key,
+pret_per_persoana number(5)
+);  
+
+create table utilizator(
+id_utilizator number constraint pk_utilizator primary key,
+nume varchar2(30),
+prenume varchar2(30),
+email varchar2(40),
+data_inregistrare date,
+telefon varchar(20),
+gen varchar2(10),
+data_nasterii date
+);  
+
+create table rezervare(
+id_rezervare number constraint pk_rezervare primary key, 
+id_utilizator number ,
+data_inceput date,
+data_sfarsit date,
+numar_persoane number,
+modalitate_plata varchar2(20),
+constraint fk_rezervare foreign key (id_utilizator) references utilizator(id_utilizator));
+  
+
+create table se_asociaza_la(
+id_locuinta number references locuinta(id_locuinta),
+id_rezervare number references rezervare(id_rezervare),
+data_asociere date,
+status varchar2(10),
+constraint pk_se_asociaza_la primary key (id_locuinta,id_rezervare)
+);
+  
+
+create table are(
+id_dotare number references dotari(id_dotare),
+id_locuinta number references locuinta(id_locuinta),
+constraint pk_are primary key (id_locuinta,id_dotare)
+);  
+
+Adăugare constrângeri pe tabele
+
+ALTER TABLE gazda
+ADD CONSTRAINT uq_email_g UNIQUE (email);
+
+ALTER TABLE rezervare
+ADD CONSTRAINT chk_date CHECK (data_inceput < data_sfarsit);
+
+ALTER TABLE utilizator
+ADD CONSTRAINT uq_email UNIQUE (email);
+ 
+alter table regiuni modify nume_regiune not null;
+alter table tari modify id_regiune not null;
+alter table locatie modify localitate not null;
+alter table locatie modify id_tara not null;
+alter table locatie modify adresa not null;
+alter table tipuri_locuinte modify nume_tip not null;
+alter table locuinta modify id_tip not null;
+alter table locuinta modify nume_locuinta not null;
+alter table locuinta modify id_locatie not null;
+alter table locuinta modify capacitate not null;
+alter table locuinta modify id_gazda not null;
+alter table dotari modify nume not null;
+alter table gazda modify nume not null;
+alter table gazda modify email not null;
+alter table gazda modify data_inceput_activitate not null;
+alter table rezervare modify id_utilizator not null;
+alter table rezervare modify data_inceput not null;
+alter table rezervare modify data_sfarsit not null;
+alter table rezervare modify numar_persoane not null;
+alter table rezervare modify modalitate_plata not null;
+alter table tarife modify pret_per_persoana not null;
+alter table utilizator modify nume not null;
+alter table utilizator modify email not null;
+alter table utilizator modify data_inregistrare not null;
+alter table utilizator modify data_nasterii not null;
+alter table se_asociaza_la modify data_asociere not null;
+alter table se_asociaza_la modify status not null;
+
+
+
+=======================================EX5=======================================
+
+insert into regiuni values(1,'Europa de Est');
+insert into regiuni values(2,'Europa de Vest');
+insert into regiuni values(3,'Europa Centrala');
+insert into regiuni values(4,'Europa de Nord');
+insert into regiuni values(5,'Europa de Sud');
+insert into regiuni values(6,'America');
+
+select * from regiuni;
+ 
+insert into tari values('RO','Romania',1);
+insert into tari values('IT','Italia',5);
+insert into tari values('BE','Belgia',2);
+insert into tari values('CH','Elvetia',2);
+insert into tari values('DE','Germania',3);
+insert into tari values('ES','Spania',5);
+insert into tari values('FR','Franta',2);
+insert into tari values('NL','Olanda',2);
+insert into tari values('UK','Regatul Unit',2);
+insert into tari values('US','Statele Unite ale Americii',6);
+insert into tari values('NO','Norvegia',4);
+insert into tari values('GR','Grecia',5);
+
+select * from tari;
+ 
+insert into locatie values(150,'Bulevardul Nicolae Balcescu 4','010011','Bucuresti','RO');--hotel
+insert into locatie values(151,'Lazio 111','00100','Roma','IT');--ap
+insert into locatie values(152,'Ixelles 2A','1004','Bruxelles','BE');--ap
+insert into locatie values(153,'Ostermundigen 18C','03564','Berna','CH');--ap
+insert into locatie values(154,'Lützowplatz 17, Mitte','89004','Berlin','DE');--hotel
+insert into locatie values(155,'Calle de San Pedro Mártir 9','28001','Madrid','ES');--vila
+insert into locatie values(156,'7 Arondismentul 19','75001','Paris','FR');--vila
+insert into locatie values(157,'Keizersgracht 215','1011','Amsterdam','NL');--ap
+insert into locatie values(158,'52-54 Upper Richmond Road, Wandsworth','SW1A 1AA','Londra','UK');--hotel
+insert into locatie values(159,'East Village 4D','10001','New York','US');--ap
+insert into locatie values(160,'Nesodden, Viken 15','0010','Oslo','NO');--cabana
+insert into locatie values(161,'16 Voulis','10557','Atena','GR');--hotel
+insert into locatie values(163,'Hoia Baciu 185','98054','Cluj','RO');--cabana
+insert into locatie values(162,'Strada Tineretului 134','22224','Costinesti','RO');--pensiune
+insert into locatie values(164,'Strada Reconstruc?iei 2','02468','Sibiu','RO');--pensiune
+select * from locatie;
+
+ 
+
+
+insert into tipuri_locuinte values(10,'apartament single',600);
+insert into tipuri_locuinte values(20,'apartament double',601);
+insert into tipuri_locuinte values(30,'apartament triple',602);
+insert into tipuri_locuinte values(40,'hotel 3 stele',603);
+insert into tipuri_locuinte values(50,'hotel 4 stele',604);
+insert into tipuri_locuinte values(60,'hotel 5 stele',605);
+insert into tipuri_locuinte values(70,'cabana',606);
+insert into tipuri_locuinte values(80,'pensiune',607);
+insert into tipuri_locuinte values(90,'vila',608);
+
+select * from tipuri_locuinte;
+ 
+
+insert into dotari values (200,'wifi',null);
+insert into dotari values (201,'parcare',10);
+insert into dotari values (202,'aer conditionat',null);
+insert into dotari values (203,'gratar',null);
+insert into dotari values (204,'pat copil',75);
+insert into dotari values (205,'incalzire',null);
+insert into dotari values (206,'piscina',40);
+insert into dotari values (207,'semineu',null);
+select * from dotari;
+ 
+
+insert into gazda values(seq_gazda.nextval,'Brown','James','b_js@yahoo.com','0779478514',to_date('16/02/2016','dd/mm/yyyy'));
+insert into gazda values(seq_gazda.nextval,'Ionescu','Mihaela','m_I@gmail.com',null,to_date('21/01/2007','dd/mm/yyyy'));
+insert into gazda values(seq_gazda.nextval,'Morris','Steve','m_s@yahoo.com',null,to_date('21/06/1999','dd/mm/yyyy'));
+insert into gazda values(seq_gazda.nextval,'Militaru','Bianca','b_aru@yahoo.com','0778140009',to_date('12/06/2009','dd/mm/yyyy'));
+insert into gazda values(seq_gazda.nextval,'Rojo','Angela','A_ELA@yahoo.com',null,to_date('06/08/2003','dd/mm/yyyy'));
+insert into gazda values(seq_gazda.nextval,'Vale','Estibaliz','e_val@gmail.com',null,to_date('03/10/2008','dd/mm/yyyy'));
+insert into gazda values(seq_gazda.nextval,'King','John','kingj@gmail.com','478514',to_date('16/07/2007','dd/mm/yyyy'));
+select * from gazda;
+ 
+
+insert into locuinta values(seq_locuinta.nextval,60,'Grand Hotel',150,1000,10);--hotel 5
+insert into locuinta values(seq_locuinta.nextval,30,'Lazio Bella ',151,5,11);--ap 3
+insert into locuinta values(seq_locuinta.nextval,20,'Pink promise',152,4,12);--ap 2 
+insert into locuinta values(seq_locuinta.nextval,30,'Ap-yellow',153,6,13);--ap 3
+insert into locuinta values(seq_locuinta.nextval,40,'Magic Column',154,250,10);--hotel 3
+insert into locuinta values(seq_locuinta.nextval,90,'Vila Trevi',155,10,10);--vila
+insert into locuinta values(seq_locuinta.nextval,90,'Vila Bleu',156,15,12);--vila
+insert into locuinta values(seq_locuinta.nextval,10,'Majestic',157,2,14);--ap 1 
+insert into locuinta values(seq_locuinta.nextval,50,'Hotel Richmond',158,300,10);--hotel 4
+insert into locuinta values(seq_locuinta.nextval,20,'EV stay',159,4,14);--ap 2
+insert into locuinta values(seq_locuinta.nextval,70,'Nesodden house',160,8,12);--cabana
+insert into locuinta values(seq_locuinta.nextval,50,'Hotel Areon',161,500,10);--hotel 4
+insert into locuinta values(seq_locuinta.nextval,70,'Cabana Baciu',163,10,16);--cabana
+insert into locuinta values(seq_locuinta.nextval,80,'Casa Alex',162,12,15);--pensiune
+insert into locuinta values(seq_locuinta.nextval,80,'Buburuza',164,20,15);--pensiune
+select * from locuinta;
+ 
+insert into are values(200,200);
+insert into are values(200,210);
+insert into are values(200,220);
+insert into are values(200,230);
+insert into are values(200,240);
+insert into are values(200,250);
+insert into are values(200,260);
+insert into are values(200,270);
+insert into are values(200,280);
+insert into are values(200,290);
+insert into are values(200,310);
+insert into are values(200,330);
+insert into are values(200,340);
+insert into are values(201,280);
+insert into are values(201,200);
+insert into are values(201,310);
+insert into are values(202,200);
+insert into are values(202,210);
+insert into are values(202,220);
+insert into are values(203,330);
+insert into are values(203,340);
+insert into are values(206,250);
+insert into are values(206,260);
+insert into are values(204,240);
+insert into are values(205,300);
+insert into are values(205,320);
+insert into are values(207,270);
+
+select * from are;
+ 
+
+insert into tarife values(seq_tarife.nextval,100);
+insert into tarife values(seq_tarife.nextval,140);
+insert into tarife values(seq_tarife.nextval,250);
+insert into tarife values(seq_tarife.nextval,200);
+insert into tarife values(seq_tarife.nextval,270);
+insert into tarife values(seq_tarife.nextval,389);
+insert into tarife values(seq_tarife.nextval,99);
+insert into tarife values(seq_tarife.nextval,70);
+insert into tarife values(seq_tarife.nextval,85);
+select * from tarife;
+ 
+insert into utilizator values(seq_utilizator.nextval,'Andruta','Andra','andra.andruta60@yahoo.com',to_date('28/04/2023','dd/mm/yyyy'),'0722313159','feminin',to_date('26/02/2004','dd/mm/yyyy'));
+insert into utilizator values(seq_utilizator.nextval,'Andruta','Irina','irina.andruta@gmail.com',to_date('02/12/2013','dd/mm/yyyy'),'0722508756',null,to_date('21/01/1977','dd/mm/yyyy'));
+insert into utilizator values(seq_utilizator.nextval,'Andruta','Costi','costi.andruta@yahoo.com',to_date('11/11/2011','dd/mm/yyyy'),null,'masculin',to_date('21/01/1978','dd/mm/yyyy'));
+insert into utilizator values(seq_utilizator.nextval,'Andruta','Maia','mandruta24@yahoo.com',to_date('10/05/2024','dd/mm/yyyy'),null,'feminin',to_date('24/06/2005','dd/mm/yyyy'));
+insert into utilizator values(seq_utilizator.nextval,'Rosu','Ioana','Rioana49@yahoo.com',to_date('17/04/2015','dd/mm/yyyy'),'0778145699',null,to_date('06/08/1947','dd/mm/yyyy'));
+insert into utilizator values(seq_utilizator.nextval,'Vasile','Mona','m-vasile@gmail.com',to_date('17/04/2015','dd/mm/yyyy'),null,null,to_date('14/03/1998','dd/mm/yyyy'));
+insert into utilizator values(seq_utilizator.nextval,'Miinescu','Sorin','smorin@yahoo.com',to_date('10/10/2018','dd/mm/yyyy'),null,'masculin',to_date('08/04/2004','dd/mm/yyyy'));
+insert into utilizator values(seq_utilizator.nextval,'Popescu','Ion','ion_pope2016@yahoo.com',to_date('21/09/2016','dd/mm/yyyy'),null,'masculin',to_date('04/05/1996','dd/mm/yyyy'));
+insert into utilizator values(seq_utilizator.nextval,'Firica','Alexandru','alex.firica2005@gmail.com',to_date('21/02/2022','dd/mm/yyyy'),null,'masculin',to_date('09/11/2005','dd/mm/yyyy'));
+
+select * from utilizator;
+ 
+
+
+insert into rezervare values (seq_rezervare.nextval,100,to_date('20/07/2024','dd/mm/yyyy'),to_date('26/07/2024','dd/mm/yyyy'),2,'cash');
+insert into rezervare values (seq_rezervare.nextval,101,to_date('22/03/2023','dd/mm/yyyy'),to_date('25/03/2023','dd/mm/yyyy'),15,'card');
+insert into rezervare values (seq_rezervare.nextval,102,to_date('02/04/2025','dd/mm/yyyy'),to_date('03/04/2025','dd/mm/yyyy'),3,'transfer');
+insert into rezervare values (seq_rezervare.nextval,104,to_date('14/02/2019','dd/mm/yyyy'),to_date('16/02/2019','dd/mm/yyyy'),5,'card');
+insert into rezervare values (seq_rezervare.nextval,105,to_date('19/11/2019','dd/mm/yyyy'),to_date('29/11/2019','dd/mm/yyyy'),3,'cash');
+insert into rezervare values (seq_rezervare.nextval,106,to_date('08/10/2024','dd/mm/yyyy'),to_date('14/10/2024','dd/mm/yyyy'),8,'transfer');
+insert into rezervare values (seq_rezervare.nextval,107,to_date('20/12/2024','dd/mm/yyyy'),to_date('03/01/2025','dd/mm/yyyy'),4,'card');
+insert into rezervare values (seq_rezervare.nextval,103,to_date('20/01/2022','dd/mm/yyyy'),to_date('27/01/2022','dd/mm/yyyy'),2,'cash');
+insert into rezervare values (seq_rezervare.nextval,101,to_date('03/01/2023','dd/mm/yyyy'),to_date('05/01/2023','dd/mm/yyyy'),1,'card');
+insert into rezervare values (seq_rezervare.nextval,106,to_date('15/07/2024','dd/mm/yyyy'),to_date('25/07/2024','dd/mm/yyyy'),2,'transfer');
+insert into rezervare values (seq_rezervare.nextval,106,to_date('28/07/2022','dd/mm/yyyy'),to_date('10/08/2022','dd/mm/yyyy'),4,'cash');
+insert into rezervare values (seq_rezervare.nextval,108,to_date('20/09/2023','dd/mm/yyyy'),to_date('22/09/2023','dd/mm/yyyy'),2,'transfer');
+select * from rezervare;
+ 
+insert into se_asociaza_la values(250,1000,to_date('20/04/2024','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(340,1001,to_date('10/02/2023','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(200,1002,to_date('19/11/2024','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(210,1003,to_date('03/01/2019','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(220,1004,to_date('18/11/2019','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(300,1005,to_date('06/06/2024','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(200,1006,to_date('28/12/2023','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(240,1007,to_date('05/01/2022','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(230,1008,to_date('26/02/2022','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(270,1009,to_date('12/10/2023','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(290,1010,to_date('03/12/2021','dd/mm/yyyy'),'activa');
+insert into se_asociaza_la values(250,1011,to_date('09/05/2023','dd/mm/yyyy'),'activa');
+select * from se_asociaza_la;
+ 
+
+commit;
+ 
+
+=======================================EX6=======================================
+
+create or replace procedure loc_disponibile(
+                            p_regiune IN regiuni.nume_regiune%type,
+                            perioada_start IN date,
+                            perioada_stop  IN date) is
+    type tablou_index_loc is table of locuinta.nume_locuinta%type index by pls_integer;
+    lista_locuinte tablou_index_loc;
+    
+    type tablou_nested_rezervari is table of varchar2(50);
+    istoric_rezervari_start tablou_nested_rezervari;
+    istoric_rezervari_sfarsit tablou_nested_rezervari;
+    
+    type dot is varray(26) of dotari.nume%type;
+    lista_dotari dot;
+    
+    ok boolean;
+    nr number :=0;
+    
+begin
+--locuintele din regiunea transmisa ca parametru
+    for rec in (select l.id_locuinta, l.nume_locuinta
+                from locuinta l
+                join locatie loc on l.id_locatie = loc.id_locatie
+                join tari t on loc.id_tara = t.id_tara
+                join regiuni reg on reg.id_regiune = t.id_regiune
+                where reg.nume_regiune = p_regiune) loop
+        lista_locuinte(rec.id_locuinta) := rec.nume_locuinta;
+    end loop;
+    
+    dbms_output.put_line('Locuintele gasite in regiunea '|| p_regiune ||': ');
+    dbms_output.put_line('');
+    nr := 0;
+    for i in lista_locuinte.first..lista_locuinte.last loop
+        if lista_locuinte.exists(i) then
+            nr := nr+1;
+            dbms_output.put_line(nr ||'. '||lista_locuinte(i));
+            
+            istoric_rezervari_start := tablou_nested_rezervari();
+            istoric_rezervari_sfarsit := tablou_nested_rezervari();
+            --pt fiecare locuinta gasita perioadele in care e rezervata 
+            for aux in(
+                    select r.data_inceput,r.data_sfarsit
+                    from rezervare r
+                    join se_asociaza_la aux on aux.id_rezervare = r.id_rezervare
+                    where aux.id_locuinta = i
+                    and aux.status = 'activa' ) loop
+                istoric_rezervari_start.extend;
+                istoric_rezervari_sfarsit.extend;
+                istoric_rezervari_start(istoric_rezervari_start.last) := aux.data_inceput;
+                istoric_rezervari_sfarsit(istoric_rezervari_sfarsit.last) := aux.data_sfarsit;
+            end loop;
+            
+            ok := true;
+            
+            if istoric_rezervari_start.count = 0 then
+                dbms_output.put_line('Locuinta '|| lista_locuinte(i)||' este disponibila in perioada introdusa: '|| perioada_start||' / '|| perioada_stop);
+                
+                lista_dotari := dot();
+                
+                select d.nume 
+                bulk collect into lista_dotari
+                from dotari d
+                join are a on d.id_dotare = a.id_dotare
+                where a.id_locuinta = i;
+                  
+                if lista_dotari.count <> 0 then
+                    dbms_output.put_line('Dotarile disponibile ale acestei locuinte sunt: ');
+                    for d_index in 1..lista_dotari.count loop
+                        dbms_output.put_line('   - '|| lista_dotari(d_index));
+                    end loop;
+                    DBMS_OUTPUT.PUT_LINE('');
+
+                    dbms_output.put_line('=================================================');
+                    DBMS_OUTPUT.PUT_LINE('');
+
+                    
+                else
+                    dbms_output.put_line('Nu s-au gasit dotari pentru aceasta locuinta.');
+                    DBMS_OUTPUT.PUT_LINE('');
+
+                    dbms_output.put_line('=================================================');
+                    DBMS_OUTPUT.PUT_LINE('');
+
+                end if;
+            else
+                for j in 1 .. istoric_rezervari_start.count loop
+                        if istoric_rezervari_start(j) <= perioada_stop and istoric_rezervari_sfarsit(j) >= perioada_start then
+                            ok := false;
+                            dbms_output.put_line('Perioada selectata se suprapune deja cu o rezervare.E posibil sa nu mai avem locuri.');
+                            
+                            DBMS_OUTPUT.PUT_LINE('');
+
+                            dbms_output.put_line('=================================================');
+                            DBMS_OUTPUT.PUT_LINE('');
+
+                        end if;
+                end loop;
+                if ok = true then
+                    dbms_output.put_line('Locuinta '|| lista_locuinte(i)||' este disponibila in perioada introdusa: '|| perioada_start||'-'|| perioada_stop);
+                    lista_dotari := dot();
+                
+                    for dotari_rec in(select d.nume
+                                        from dotari d
+                                        join are a on d.id_dotare = a.id_dotare
+                                        where a.id_locuinta = i) loop
+                        lista_dotari.extend;
+                        lista_dotari(lista_dotari.last) := dotari_rec.nume;
+                        end loop;
+                    if lista_dotari.count <> 0 then
+                        dbms_output.put_line('Dotarile disponibile ale acestei locuinte sunt: ');
+                        for d_index in 1..lista_dotari.count loop
+                            dbms_output.put_line('   - '|| lista_dotari(d_index));
+                        end loop;
+                        DBMS_OUTPUT.PUT_LINE('');
+
+                        dbms_output.put_line('=================================================');
+                        DBMS_OUTPUT.PUT_LINE('');
+
+                    else
+                        dbms_output.put_line('Nu s-au gasit dotari pentru aceasta locuinta.');
+                        DBMS_OUTPUT.PUT_LINE('');
+                        dbms_output.put_line('=================================================');
+                        DBMS_OUTPUT.PUT_LINE('');
+                    end if;
+                end if;
+            end if;
+        end if;
+    end loop;
+                
+end loc_disponibile;
+
+
+=======================================EX7=======================================
+
+create sequence seq_erori
+increment by 1
+start with 1
+nocycle;
+
+create table erori (
+    id_eroare number constraint pk_eroare primary key,
+    mesaj varchar2(500),
+    data_ora timestamp default current_timestamp,
+    unde_apare varchar2(100)    
+)
+
+create or replace procedure raport_venituri_pe_categorii (p_an in varchar2) is
+    -- cursor static pentru selectarea categoriilor distincte
+    cursor c_categorii is
+        select nume_tip
+        from tipuri_locuinte;
+
+    venituri sys_refcursor;
+    
+    --cursor parametrizat pentru locatii care fac parte din categoria respectiva
+    cursor c_locuinta (p_categ varchar2,p_an number) is
+        select l.nume_locuinta, sum(r.numar_persoane * t.pret_per_persoana) as venit_locatie
+        from rezervare r
+        join se_asociaza_la s on s.id_rezervare = r.id_rezervare
+        join locuinta l on s.id_locuinta = l.id_locuinta
+        join tipuri_locuinte tip on tip.id_tip = l.id_tip
+        join tarife t on t.id_tarif = tip.id_tarif
+        where tip.nume_tip = p_categ 
+        and extract(year from r.data_inceput) = p_an
+        and s.status = 'activa'
+        group by l.nume_locuinta; 
+
+    categ_cur varchar2(50);
+    venit_total number;
+    an_valid number;
+    nume_loc varchar2(100);
+    venit_loc number;
+    null_error exception;
+    value_error7 exception;
+    
+begin
+    if p_an is null then
+        raise null_error;
+    end if;
+
+    if not regexp_like(p_an, '^\d+$') then
+        raise value_error7;
+    end if;
+    
+    an_valid := to_number(p_an);
+    
+    dbms_output.put_line('Raport venituri pentru anul ' || an_valid || ':');
+    dbms_output.put_line('===========================================');
+
+    -- parcurgere cursor static
+    for i in c_categorii loop
+        categ_cur := i.nume_tip;
+
+        open venituri for
+            'select sum(r.numar_persoane* t.pret_per_persoana) 
+             from rezervare r
+             join se_asociaza_la s on s.id_rezervare = r.id_rezervare
+             join locuinta l on s.id_locuinta = l.id_locuinta
+             join tipuri_locuinte tl on tl.id_tip = l.id_tip
+             join tarife t on t.id_tarif = tl.id_tarif
+             where tl.nume_tip = :cat and extract(year from r.data_inceput) = :an'
+            using categ_cur, an_valid;
+
+        fetch venituri into venit_total;
+        close venituri;
+
+        if venit_total is not null then
+            dbms_output.put_line('Categorie: ' || categ_cur || ' - venit total: ' || venit_total || ' lei');
+            dbms_output.put_line('');
+        else
+            dbms_output.put_line('Categorie: ' || categ_cur || ' - venit total: 0 lei');
+            dbms_output.put_line('');
+        end if;
+        
+         for j in c_locuinta(categ_cur,an_valid) loop
+                nume_loc  := j.nume_locuinta;
+                venit_loc := j.venit_locatie;
+                dbms_output.put_line('     Locuinta: ' || nume_loc || ' - venit total: ' || nvl(venit_loc, 0) || ' lei');
+                dbms_output.put_line('');
+        end loop;        
+        
+    end loop;
+    dbms_output.put_line('===========================================');
+exception
+    when null_error then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'Parametrul p_an nu poate fi NULL!', 'raport_venituri_pe_categorii');
+        dbms_output.put_line('Parametrul p_an nu poate fi NULL!');
+    when value_error7 then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'Valoarea parametrului este gresita!!!', 'raport_venituri_pe_categorii');
+        dbms_output.put_line('Valoarea parametrului este gresita');
+    when others then
+            insert into erori (id_eroare, mesaj, unde_apare)
+            values (seq_erori.nextval, 'A aparut o eroare neasteptata!', 'raport_venituri_pe_categorii');
+            dbms_output.put_line('A aparut o eroare neasteptata!');
+       
+end raport_venituri_pe_categorii;
+/
+
+
+=======================================EX8=======================================
+
+create or replace type info_rezervare_record as object(
+    val_max number,
+    nume_utilizator varchar2(30),
+    prenume_utilizator varchar2(30),
+    id_rezervare number,
+    nume_loc varchar2(30)
+);
+create or replace function rezervare_maxima (tara_input tari.nume_tara%type) return info_rezervare_record is
+    venit_max number := 0;
+    nume_u_func utilizator.nume%type;
+    prenume_u_func utilizator.prenume%type;
+    rezerv rezervare.id_rezervare%type;
+    loc_val locuinta.nume_locuinta%type; 
+    numar_rezervari number := 0; 
+    
+    fara_rezervari exception;
+begin
+    if tara_input is null or length(trim(tara_input)) = 0 or regexp_like(tara_input, '^\d+$') then
+        raise value_error; 
+    end if;
+    
+    declare
+        tara_exista number := 0;
+    begin
+        select count(*) into tara_exista
+        from tari
+        where lower(nume_tara) = lower(tara_input);
+
+        if tara_exista = 0 then
+            raise no_data_found; 
+        end if;
+        
+    end;
+    
+    select count(*) into numar_rezervari 
+    from rezervare r
+    join se_asociaza_la s on s.id_rezervare = r.id_rezervare
+    join locuinta l on l.id_locuinta = s.id_locuinta
+    join locatie loc on l.id_locatie = loc.id_locatie
+    join tari ta on ta.id_tara = loc.id_tara
+    where s.status = 'activa'
+    and lower(ta.nume_tara) = lower(tara_input);
+    
+    if numar_rezervari = 0 then 
+        raise fara_rezervari;
+    else
+        select r.id_rezervare,l.nume_locuinta,max(t.pret_per_persoana*r.numar_persoane) into rezerv, loc_val, venit_max
+        from rezervare r
+        join se_asociaza_la s on s.id_rezervare = r.id_rezervare
+        join locuinta l on l.id_locuinta = s.id_locuinta
+        join tipuri_locuinte tip on tip.id_tip = l.id_tip
+        join tarife t on t.id_tarif = tip.id_tarif
+        join locatie loc on l.id_locatie = loc.id_locatie
+        join tari ta on ta.id_tara = loc.id_tara
+        where s.status = 'activa'
+        and lower(ta.nume_tara) = lower(tara_input)
+        group by l.nume_locuinta,r.id_rezervare;
+    end if;
+     if venit_max <> 0  then
+        select u.nume,u.prenume into nume_u_func, prenume_u_func
+        from utilizator u
+        join rezervare r on u.id_utilizator = r.id_utilizator
+        where r.id_rezervare = rezerv;
+    end if;
+        
+    return info_rezervare_record(venit_max,nume_u_func,prenume_u_func,rezerv,loc_val);
+    
+exception
+     when value_error then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'Valoarea parametrului este gresita!!!', 'rezervare_maxima');
+        dbms_output.put_line('Valoarea parametrului este gresita');
+        return info_rezervare_record(0, NULL, NULL, NULL, NULL);
+    when fara_rezervari then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'In tara introdusa nu s-au inregistrat rezervari!!!', 'rezervare_maxima');
+        dbms_output.put_line('In tara introdusa nu s-au inregistrat rezervari');
+        return info_rezervare_record(0, NULL, NULL, NULL, NULL);
+    when no_data_found then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'Nu s-a gasit tara in baza de date!', 'rezervare_maxima');
+        dbms_output.put_line('Nu s-a gasit tara in baza de date!!!');
+        return info_rezervare_record(0, NULL, NULL, NULL, NULL);
+    when too_many_rows then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'Sunt mai multe rezervari cu aceeasi valoare maxima!!!', 'rezervare_maxima');
+        dbms_output.put_line('Sunt mai multe rezervari cu aceeasi valoare maxima!');
+        return info_rezervare_record(0, NULL, NULL, NULL, NULL);    
+end rezervare_maxima;
+/
+
+
+=======================================EX9=======================================
+
+create or replace type tipuri_varray as varray(200) of varchar2(20);
+
+create or replace type analiza_record as object(
+    numar_modalitati number,
+    lista_tipuri tipuri_varray,
+    valoare_totala number,
+    tip_frecvent varchar2(20),
+    total_zile number,
+    categorie_utilizator varchar2(50)   
+);
+
+create or replace procedure analiza_rezervari_utilizator(
+                p_nume_utilizator in varchar2,
+                p_prenume_utilizator in varchar2,
+                p_analiza out analiza_record ) is
+                
+                
+    --============exceptii proprii===============--
+    
+    ex_rezervari_active exception;
+
+    ex_valoare_zero exception;
+    
+    ex_modalitate_invalida exception;
+    
+    --===========================================--
+                
+    cod_u utilizator.id_utilizator%type;
+    numar_modalitati number := 0;
+    lista_tipuri tipuri_varray := tipuri_varray();
+    valoare_totala number := 0;
+    tip_frecvent varchar2(50);
+    total_zile number;
+    categorie_utilizator varchar2(50);
+    nr_rezerv number := 0;
+    mod_plata_nedefinit number:=0;
+    
+    cursor c_tipuri is
+        select distinct t.nume_tip
+        from tipuri_locuinte t
+        join locuinta l on l.id_tip = t.id_tip
+        join se_asociaza_la s on l.id_locuinta = s.id_locuinta
+        join rezervare r on s.id_rezervare = r.id_rezervare
+        where r.id_utilizator = cod_u;
+        
+    cursor curs_frecventa is
+        select t.nume_tip, count(*) as numar
+        from tipuri_locuinte t
+        join locuinta l on l.id_tip = t.id_tip
+        join se_asociaza_la s on s.id_locuinta = l.id_locuinta
+        join rezervare r on r.id_rezervare = s.id_rezervare
+        where r.id_utilizator = cod_u
+        group by t.nume_tip
+        order by count(*) desc;
+        
+     c_frecv_rec curs_frecventa%rowtype;
+    
+begin
+--iau id-ul util dupa numele dat ca parametru
+    select id_utilizator  into cod_u
+    from utilizator 
+    where lower(nume) = lower(p_nume_utilizator) and lower(prenume) = lower(p_prenume_utilizator);
+    
+-- nr modalitatile lui de plata(le iau in calcul doar daca rezervarile au ramas active) si nr de rezervari facute  
+    select count(distinct r.modalitate_plata) into numar_modalitati
+    from rezervare r
+    join se_asociaza_la s on r.id_rezervare = s.id_rezervare
+    where r.id_utilizator = cod_u
+    and s.status = 'activa';
+    
+    select count(*) into mod_plata_nedefinit
+    from rezervare r
+    join se_asociaza_la s on r.id_rezervare = s.id_rezervare
+    where r.id_utilizator = cod_u
+    and s.status = 'activa'
+    and r.modalitate_plata not in ('cash', 'transfer', 'card');
+    
+    if mod_plata_nedefinit > 0 then 
+        raise ex_modalitate_invalida;
+    end if;
+    
+    select count(r.id_rezervare) into nr_rezerv
+    from rezervare r
+    where r.id_utilizator = cod_u;
+    
+--exceptie custom    
+    if nr_rezerv = 0 then
+        raise ex_rezervari_active;
+    end if;
+    
+--determinare categ utilizator in functie de nr de r
+    if nr_rezerv < 2 then
+        categorie_utilizator := 'Utilizator BRONZE';
+    elsif nr_rezerv between 2 and 5 then
+        categorie_utilizator := 'Utilizator SILVER';
+    elsif nr_rezerv between 5 and 10 then
+        categorie_utilizator := 'Utilizator GOLD';
+    else
+        categorie_utilizator := 'Utilizator PREMIUM';
+    end if;
+    
+    lista_tipuri := tipuri_varray();
+-- lista de tipuri rezervate
+    for c_rec in c_tipuri loop
+        lista_tipuri.extend;
+        lista_tipuri(lista_tipuri.last) := c_rec.nume_tip;
+    end loop;
+    
+    if lista_tipuri.count = 0 then
+    dbms_output.put_line('Nu există tipuri de locuințe rezervate pentru utilizator.');
+    end if;
+    
+
+-- valoare totala ->>>>>>>> 5 dintre tabelele create
+    select nvl(sum(r.numar_persoane * t.pret_per_persoana), 0)
+    into valoare_totala
+    from rezervare r 
+    join se_asociaza_la s on r.id_rezervare = s.id_rezervare
+    join locuinta l on s.id_locuinta = l.id_locuinta
+    join tipuri_locuinte tip on tip.id_tip = l.id_tip
+    join tarife t on t.id_tarif = tip.id_tarif
+    where r.id_utilizator = cod_u;
+    
+    if valoare_totala = 0 then
+        raise ex_valoare_zero;
+    end if;
+    
+-- tipul cel mai frecvent
+    open curs_frecventa;
+    fetch curs_frecventa into c_frecv_rec;
+    if curs_frecventa%found then
+        tip_frecvent := c_frecv_rec.nume_tip;
+    else
+        tip_frecvent := null;
+    end if;
+    close curs_frecventa;
+    
+-- nr zile
+    select sum(data_sfarsit - data_inceput)
+    into total_zile
+    from rezervare
+    where id_utilizator = cod_u;
+    
+    p_analiza := analiza_record(
+    numar_modalitati,
+    lista_tipuri, -- Atribuie colecția inițializată
+    valoare_totala,
+    tip_frecvent,
+    total_zile,
+    categorie_utilizator
+    );
+    
+exception
+    when ex_rezervari_active then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'Utilizatorul exista,dar nu are sau nu a avut rezervari active.', 'analiza_rezervari_utilizator');
+        dbms_output.put_line('Utilizatorul exista,dar nu are sau nu a avut rezervari active.');
+    when ex_valoare_zero then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'Valoarea totala e zero,verificati tarifele si rezervarile.', 'analiza_rezervari_utilizator');
+        dbms_output.put_line('Valoarea totala e zero,verificati tarifele si rezervarile.');
+    when ex_modalitate_invalida then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'S-a inregistrat o modalitate invalida de plata,verificati inregistrarile.', 'analiza_rezervari_utilizator');
+        dbms_output.put_line('S-a inregistrat o modalitate invalida de plata,verificati inregistrarile.');
+    when no_data_found then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'Nu s-au gasit datele cautate!', 'analiza_rezervari_utilizator');
+        dbms_output.put_line('Nu s-au gasit datele cautate');
+    when too_many_rows then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'Exista mai multi utilizatori cu acelasi nume.Verificati baza de date.', 'analiza_rezervari_utilizator');
+        dbms_output.put_line('Exista mai multi utilizatori cu acelasi nume.Verificati baza de date.');
+    when others then
+        insert into erori (id_eroare, mesaj, unde_apare)
+        values (seq_erori.nextval, 'A aparut o eroare neasteptata', 'analiza_rezervari_utilizator');
+        dbms_output.put_line('A aparut o eroare neasteptata');
+             
+end analiza_rezervari_utilizator;
+/
+
+
+=======================================EX10=======================================
+
+create sequence seq_audit_r
+increment by 1
+start with 1
+nocycle;
+
+create table rezervari_audit(
+    id_audit number,
+    comanda varchar2(15),
+    utilizator varchar2(40),
+    data_comanda timestamp default current_timestamp,
+    randuri_afectate number
+);
+
+drop table rezervari_audit;
+drop sequence seq_audit_r;
+
+create or replace trigger trig_ex10
+    after insert or update or delete on rezervare
+declare
+    nr_randuri number := 0;
+    t_comanda varchar2(15);
+begin
+    if INSERTING then
+        t_comanda := 'INSERT';
+        select count(*) into nr_randuri
+        from rezervare
+        where rowid in (select rowid from rezervare);
+    elsif UPDATING then
+        t_comanda := 'UPDATE';
+        select count(*) into nr_randuri
+        from rezervare
+        where rowid in (select rowid from rezervare);
+    elsif DELETING then
+        t_comanda := 'DELETE';
+        select count(*) into nr_randuri
+        from rezervare;
+    end if;
+    
+    insert into rezervari_audit 
+    values (seq_audit_r.nextval, t_comanda, sys_context('USERENV','SESSION_USER'), systimestamp ,nr_randuri);
+end;
+/
+
+
+=======================================EX11=======================================
+
+--========TABELA AUDIT========--
+create sequence seq_audit_u
+increment by 1
+start with 1
+nocycle;
+
+create table discount_u_audit(
+    id_audit number,
+    id_utilizator number,
+    old_discount number,
+    new_discount number,
+    data_modificare timestamp
+);
+
+--=======MODIFICARE TABELA UTILIZATOR=======--
+alter table utilizator add (discount number);
+
+select *
+from utilizator;
+
+update utilizator
+set discount = 0;
+
+
+
+--=======TRIGGER=======--
+
+create or replace trigger trig_ex11
+before update or insert on utilizator
+for each row
+declare
+    durata_rezervari number := 0;
+    discount_actual number;
+    discount_vechi number;
+
+begin
+
+    select nvl(sum(r.data_sfarsit-r.data_inceput),0) into durata_rezervari
+    from rezervare r
+    join se_asociaza_la s on r.id_rezervare = s.id_rezervare
+    where id_utilizator = :new.id_utilizator
+    and s.status = 'activa';
+    
+    if durata_rezervari between 10 and 25 then
+        discount_actual := 5; --5 la suta
+    elsif durata_rezervari between 26 and 50 then
+        discount_actual := 10; --10 la suta
+    elsif durata_rezervari > 50 then
+        discount_actual := 20;
+    else 
+        discount_actual := 0;
+    end if;
+
+    discount_vechi := :new.discount;
+    
+    if (discount_actual <> discount_vechi) or (discount_vechi is null) then
+        :new.discount := discount_actual;
+        
+        insert into discount_u_audit values (seq_audit_u.nextval,:new.id_utilizator,discount_vechi,discount_actual,systimestamp);
+    
+    end if;
+end;
+/
+
+
+=======================================EX12=======================================
+
+--========TABELA AUDIT========--
+create sequence seq_audit_drop
+increment by 1
+start with 1
+nocycle;
+
+create table audit_drop(
+    id_audit number,
+    utilizator varchar2(60),
+    data_incercare timestamp,
+    tabel varchar2(30)
+);
+
+----=======LISTA TABELE PROTEJATE IN VARRAY========-------
+create or replace type tabele_protejate as varray(10) of varchar2(30);
+/
+
+--=======TRIGGER=======--
+
+create or replace trigger trig_ex12
+before drop on schema
+declare
+    tab varchar2(30);
+    tabele_protej tabele_protejate := tabele_protejate('DISCOUNT_U_AUDIT', 'REZERVARI_AUDIT', 'ERORI');
+begin
+    tab := sys.dictionary_obj_name;
+    
+    for i in 1..tabele_protej.count loop
+        if upper(tab) = upper(tabele_protej(i)) then
+            -- Înregistrează încercarea în tabelul de audit
+            insert into audit_drop values (seq_audit_drop.nextval, 
+                                           SYS_CONTEXT('USERENV','SESSION_USER'), 
+                                           systimestamp, 
+                                           tab);
+            -- Afișează mesajul și ridică o eroare pentru a preveni ștergerea
+            dbms_output.put_line('Stergerea tabelului ' || tab || ' este interzisa deoarece este un tabel protejat!');
+            raise_application_error(-20001, 'Stergerea tabelului ' || tab || ' este interzisa!');
+        end if;
+    end loop;
+end;
+/
+
+
+=======================================EX13=======================================
+
+CREATE OR REPLACE PACKAGE pachetEx13 AS
+
+    -- Tipuri de date complexe
+    TYPE record_rezervari IS RECORD (
+        id_rezervare NUMBER,
+        id_utilizator NUMBER,
+        id_locuinta NUMBER,
+        data_inceput DATE,
+        data_sfarsit DATE,
+        cost_total NUMBER
+    );
+
+    TYPE lista_rezervari IS TABLE OF record_rezervari;
+    
+    
+    TYPE record_locuinta IS RECORD (
+        id_locuinta NUMBER,
+        nume_locuinta VARCHAR2(70),
+        venit_locuinta NUMBER
+    );
+
+    TYPE lista_locuinte IS TABLE OF record_locuinta;
+    
+     TYPE record_gazda IS RECORD (
+        id_gazda NUMBER,
+        venit_total NUMBER,
+        nume_gazda VARCHAR2(50),
+        prenume_gazda VARCHAR2(50),
+        locuinte_rezervate lista_locuinte
+    );
+
+    TYPE lista_gazde IS TABLE OF record_gazda;
+
+
+
+    -- Functii
+    FUNCTION calculVenitLunar(luna VARCHAR2, year VARCHAR2) RETURN NUMBER;
+    FUNCTION calculVenitAnual(year VARCHAR2) RETURN NUMBER;
+
+    -- Proceduri
+    PROCEDURE raportAnual(year VARCHAR2);
+    PROCEDURE raportRezervariAn(year VARCHAR2);
+    PROCEDURE top3Gazde(year VARCHAR2);
+    
+END pachetEx13;
+/
+
+CREATE OR REPLACE PACKAGE BODY pachetEx13 AS
+
+    rezervari lista_rezervari;
+    venituri_anuale NUMBER := 0;
+
+     FUNCTION calculVenitLunar(luna VARCHAR2, year VARCHAR2) RETURN NUMBER IS
+        total_luna NUMBER := 0;
+    BEGIN
+            FOR rec IN (
+                SELECT r.id_rezervare, 
+                       SUM(r.numar_persoane * t.pret_per_persoana) + NVL(SUM(d.cost_suplimentar), 0) AS cost_total_rezervare
+                FROM rezervare r
+                JOIN se_asociaza_la s ON r.id_rezervare = s.id_rezervare
+                JOIN locuinta l ON s.id_locuinta = l.id_locuinta
+                JOIN tipuri_locuinte tip ON tip.id_tip = l.id_tip
+                JOIN tarife t ON tip.id_tarif = t.id_tarif
+                LEFT JOIN are a ON l.id_locuinta = a.id_locuinta
+                LEFT JOIN dotari d ON a.id_dotare = d.id_dotare
+                WHERE TRIM(TO_CHAR(data_inceput, 'Month')) = luna
+                  AND TO_CHAR(data_inceput, 'YYYY') = year
+                GROUP BY r.id_rezervare
+            ) LOOP
+                total_luna := total_luna + rec.cost_total_rezervare;
+            END LOOP;
+         RETURN total_luna;
+    END calculVenitLunar;
+
+   FUNCTION calculVenitAnual(year VARCHAR2) RETURN NUMBER IS
+        total_an NUMBER := 0;
+        venit_lunar NUMBER;
+        luna VARCHAR2(9); -- Numele lunii
+    BEGIN
+        
+        FOR i IN 1..12 LOOP
+            luna := TRIM(TO_CHAR(TO_DATE(i, 'MM'), 'Month'));
+            
+            
+            venit_lunar := calculVenitLunar(luna, year);
+            
+           
+            total_an := total_an + venit_lunar;
+        END LOOP;
+        
+        RETURN total_an;
+    END calculVenitAnual;
+
+    -- Procedura raportAnual
+   PROCEDURE raportAnual(year VARCHAR2) IS
+    total_an NUMBER := 0;
+    venit_lunar NUMBER;
+    luna VARCHAR2(9); -- Numele lunii
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('==============================================');
+    DBMS_OUTPUT.PUT_LINE('Raport anual pentru anul ' || year || ':');
+    DBMS_OUTPUT.PUT_LINE('==============================================');
+    
+    FOR i IN 1..12 LOOP
+       
+        luna := TRIM(TO_CHAR(TO_DATE(i, 'MM'), 'Month'));
+        
+        venit_lunar := calculVenitLunar(luna, year);
+        
+        DBMS_OUTPUT.PUT_LINE('     '||i||'.Luna ' || luna || ': Venit ' || venit_lunar);
+        
+        total_an := total_an + venit_lunar;
+    END LOOP;
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('        Venit total anual: ' || total_an);
+END raportAnual;
+
+-- Procedura raportRezervariAn
+    PROCEDURE raportRezervariAn(year VARCHAR2) IS
+        rezervari_an lista_rezervari := lista_rezervari();
+        total_rezervari NUMBER := 0;
+    BEGIN
+        FOR rec IN (
+            SELECT r.id_rezervare,
+                   r.id_utilizator,
+                   l.id_locuinta,
+                   r.data_inceput,
+                   r.data_sfarsit,
+                   (SUM(r.numar_persoane * t.pret_per_persoana) + NVL(SUM(d.cost_suplimentar), 0)) AS cost_total_rezervare
+            FROM rezervare r
+            JOIN se_asociaza_la s ON r.id_rezervare = s.id_rezervare
+            JOIN locuinta l ON s.id_locuinta = l.id_locuinta
+            JOIN tipuri_locuinte tip ON tip.id_tip = l.id_tip
+            JOIN tarife t ON tip.id_tarif = t.id_tarif
+            LEFT JOIN are a ON l.id_locuinta = a.id_locuinta
+            LEFT JOIN dotari d ON a.id_dotare = d.id_dotare
+            WHERE TO_CHAR(r.data_inceput, 'YYYY') = year
+            GROUP BY r.id_rezervare, r.id_utilizator, l.id_locuinta, r.data_inceput, r.data_sfarsit
+        ) LOOP
+      
+            rezervari_an.EXTEND;
+            rezervari_an(rezervari_an.COUNT) := record_rezervari(
+                rec.id_rezervare,
+                rec.id_utilizator,
+                rec.id_locuinta,
+                rec.data_inceput,
+                rec.data_sfarsit,
+                rec.cost_total_rezervare
+            );
+            
+          
+            total_rezervari := total_rezervari + rec.cost_total_rezervare;
+        END LOOP;
+        
+        DBMS_OUTPUT.PUT_LINE('=================================================');
+        DBMS_OUTPUT.PUT_LINE('Raport rezervari pentru anul ' || year || ':');
+        DBMS_OUTPUT.PUT_LINE('=================================================');
+        FOR i IN 1..rezervari_an.COUNT LOOP
+            DBMS_OUTPUT.PUT_LINE('Rezervare ID: ' || rezervari_an(i).id_rezervare ||
+                                 ', Utilizator ID: ' || rezervari_an(i).id_utilizator ||
+                                 ', Locuinta ID: ' || rezervari_an(i).id_locuinta ||
+                                 ', Perioada: ' || rezervari_an(i).data_inceput || ' - ' || rezervari_an(i).data_sfarsit ||
+                                 ', Cost total: ' || rezervari_an(i).cost_total);
+        END LOOP;
+        
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('        Total venit din rezervari in acest an: ' || total_rezervari);
+    END raportRezervariAn;
+
+   
+PROCEDURE top3Gazde(year VARCHAR2) IS
+    gazde lista_gazde := lista_gazde(); 
+    venit_gazda NUMBER;
+    nume_gazda VARCHAR2(100);
+    prenume_gazda VARCHAR2(100);
+    locuinte_rezervate lista_locuinte := lista_locuinte(); 
+BEGIN
+    
+    FOR rec IN (
+        SELECT l.id_gazda,
+               SUM(r.numar_persoane * t.pret_per_persoana + NVL(d.cost_suplimentar, 0)) AS venit_total
+        FROM locuinta l
+        JOIN se_asociaza_la s ON l.id_locuinta = s.id_locuinta
+        JOIN rezervare r ON s.id_rezervare = r.id_rezervare
+        LEFT JOIN tipuri_locuinte tip ON tip.id_tip = l.id_tip
+        LEFT JOIN tarife t ON tip.id_tarif = t.id_tarif
+        LEFT JOIN are a ON l.id_locuinta = a.id_locuinta
+        LEFT JOIN dotari d ON a.id_dotare = d.id_dotare
+        WHERE TO_CHAR(r.data_inceput, 'YYYY') = year
+        GROUP BY l.id_gazda
+        ORDER BY venit_total DESC
+        FETCH FIRST 3 ROWS ONLY 
+    ) LOOP
+     
+        venit_gazda := rec.venit_total;
+
+ 
+        SELECT nume, prenume INTO nume_gazda, prenume_gazda
+        FROM gazda
+        WHERE id_gazda = rec.id_gazda;
+
+       
+        FOR locuinta IN (
+            SELECT l.id_locuinta, l.nume_locuinta
+            FROM locuinta l
+            JOIN se_asociaza_la s ON l.id_locuinta = s.id_locuinta
+            JOIN rezervare r ON s.id_rezervare = r.id_rezervare
+            WHERE l.id_gazda = rec.id_gazda
+              AND TO_CHAR(r.data_inceput, 'YYYY') = year
+        ) LOOP
+           
+            locuinte_rezervate.EXTEND;
+            locuinte_rezervate(locuinte_rezervate.COUNT) := record_locuinta(
+                locuinta.id_locuinta,
+                locuinta.nume_locuinta,
+                0 
+            );
+        END LOOP;
+
+       
+        gazde.EXTEND;
+        gazde(gazde.COUNT) := record_gazda(
+            rec.id_gazda,
+            venit_gazda,
+            nume_gazda,
+            prenume_gazda,
+            locuinte_rezervate 
+        );
+
+        locuinte_rezervate.DELETE;
+    END LOOP;
+    DBMS_OUTPUT.PUT_LINE('--------------------------------------------');
+    DBMS_OUTPUT.PUT_LINE('Top 3 gazde pentru anul ' || year || ':');
+    DBMS_OUTPUT.PUT_LINE('--------------------------------------------');
+    FOR i IN 1..LEAST(3, gazde.COUNT) LOOP
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE(i||'.Gazda ID: ' || gazde(i).id_gazda ||
+                             ', Nume: ' || gazde(i).nume_gazda || ' ' || gazde(i).prenume_gazda ||
+                             ', Venit total: ' || gazde(i).venit_total);
+
+        DBMS_OUTPUT.PUT_LINE('Locuinte rezervate:');
+        FOR j IN 1..gazde(i).locuinte_rezervate.COUNT LOOP
+            DBMS_OUTPUT.PUT_LINE('  Locuinta ID: ' || gazde(i).locuinte_rezervate(j).id_locuinta ||
+                                 ', Nume locuinta: ' || gazde(i).locuinte_rezervate(j).nume_locuinta);
+        END LOOP;
+    END LOOP;
+END top3Gazde;
+
+
+END pachetEx13;
+/
